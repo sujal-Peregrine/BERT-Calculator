@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 import os
 import hashlib
 import nltk
+import traceback
 
 # ------------------------------
 # NLTK setup function
@@ -24,6 +25,10 @@ def setup_nltk():
                 nltk.data.find(f'tokenizers/{resource}')
         except LookupError:
             nltk.download(resource, download_dir=nltk_data_path)
+
+    # Preload tokenizers to avoid first-request issues
+    _ = nltk.word_tokenize("NLTK ready")
+    _ = nltk.sent_tokenize("NLTK ready")
 
     print(f"NLTK setup complete. Data path: {nltk_data_path}")
 
@@ -73,12 +78,16 @@ EMOTION_WEIGHTS = {
 
 _ethical_alignment_cache = {}
 
-cmu_dict = nltk.corpus.cmudict.dict()
+# Safe cmudict loading
+try:
+    cmu_dict = nltk.corpus.cmudict.dict()
+except LookupError:
+    nltk.download('cmudict', download_dir=os.path.join(os.getcwd(), "nltk_data"))
+    cmu_dict = nltk.corpus.cmudict.dict()
 
 # ------------------------------
 # Helper Functions
 # ------------------------------
-
 def count_syllables(word):
     """
     Counts syllables using CMU dictionary; fallback to vowel heuristic.
@@ -238,7 +247,8 @@ def evaluate():
         return jsonify({"score": score})
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        tb = traceback.format_exc()
+        return jsonify({"error": str(e), "traceback": tb}), 500
 
 # ------------------------------
 # Run server
