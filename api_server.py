@@ -16,15 +16,18 @@ def setup_nltk():
     nltk.data.path.append(nltk_data_path)
 
     # Download required resources if missing
-    required = ['cmudict', 'punkt']
-    for resource in required:
-        try:
-            if resource == 'cmudict':
-                nltk.data.find(f'corpora/{resource}')
-            else:
-                nltk.data.find(f'tokenizers/{resource}')
-        except LookupError:
-            nltk.download(resource, download_dir=nltk_data_path)
+   required = ['cmudict', 'punkt_tab']
+
+   for resource in required:
+    try:
+        if resource == 'cmudict':
+            nltk.data.find(f'corpora/{resource}')
+        else:
+            # Use 'punkt_tab' path for the tokenizer
+            nltk.data.find(f'tokenizers/punkt_tab/english')
+    except LookupError:
+        nltk.download(resource, download_dir=nltk_data_path)
+
 
     # Preload tokenizers to avoid first-request issues
     _ = nltk.word_tokenize("NLTK ready")
