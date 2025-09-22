@@ -1,13 +1,23 @@
-from flask import Flask, request, jsonify
-import hashlib
 import nltk
 import os
 
-# ------------------------------
-# NLTK setup
-# ------------------------------
-nltk.data.path.append('/usr/local/share/nltk_data')
-cmu_dict = nltk.corpus.cmudict.dict()
+# Create a local folder to store NLTK data
+nltk_data_path = os.path.join(os.getcwd(), "nltk_data")
+os.makedirs(nltk_data_path, exist_ok=True)
+
+# Tell NLTK to look here first
+nltk.data.path.append(nltk_data_path)
+
+# Download cmudict and punkt if missing
+try:
+    nltk.data.find('corpora/cmudict')
+except LookupError:
+    nltk.download('cmudict', download_dir=nltk_data_path)
+
+try:
+    nltk.data.find('tokenizers/punkt')
+except LookupError:
+    nltk.download('punkt', download_dir=nltk_data_path)
 
 LGBTQ_AFFIRMING_TERMS = {
     'sexual orientation', 'gender identity', 'lgbtq', 'transgender', 'non-binary',
