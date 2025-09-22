@@ -1,5 +1,7 @@
-import nltk
+from flask import Flask, request, jsonify
 import os
+import hashlib
+import nltk
 
 # Create a local folder to store NLTK data
 nltk_data_path = os.path.join(os.getcwd(), "nltk_data")
