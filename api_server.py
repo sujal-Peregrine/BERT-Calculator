@@ -9,35 +9,26 @@ import traceback
 # ------------------------------
 def setup_nltk():
     """
-    Ensure required NLTK data is downloaded and available for deployment.
+    Ensure required NLTK data is downloaded and available.
     """
-    import nltk
-    import os
-
     nltk_data_path = os.path.join(os.getcwd(), "nltk_data")
     os.makedirs(nltk_data_path, exist_ok=True)
     nltk.data.path.append(nltk_data_path)
 
-    # Standard NLTK resources
-    required = ['punkt', 'cmudict']
+    # Download required resources if missing
+    required = ['cmudict', 'punkt_tab']  # Updated to use punkt_tab
+    for resource in required:
+        try:
+            if resource == 'cmudict':
+                nltk.data.find(f'corpora/{resource}')
+            else:
+                nltk.data.find(f'tokenizers/{resource}')
+        except LookupError:
+            nltk.download(resource, download_dir=nltk_data_path)
 
-    required = ['cmudict', 'punkt_tab']
-for resource in required:
-    try:
-        if resource == 'cmudict':
-            nltk.data.find(f'corpora/{resource}')
-        else:
-            nltk.data.find(f'tokenizers/punkt_tab/english')
-    except LookupError:
-        nltk.download(resource, download_dir=nltk_data_path)
-
-    # Preload tokenizers safely
-    try:
-        _ = nltk.word_tokenize("NLTK ready")
-        _ = nltk.sent_tokenize("NLTK ready")
-    except LookupError as e:
-        print("Error loading tokenizer:", e)
-        raise
+    # Preload tokenizers to avoid first-request issues
+    _ = nltk.word_tokenize("NLTK ready")
+    _ = nltk.sent_tokenize("NLTK ready")
 
     print(f"NLTK setup complete. Data path: {nltk_data_path}")
 
